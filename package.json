@@ -1,0 +1,26 @@
+{
+  "name": "insta-ext",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:css": "npx tailwindcss -i ./src/styles/app.css -o ./dist/css/app.css --watch",
+    "dev:js": "node build.config.js",
+    "dev:content": "esbuild content/content.js --bundle --minify --watch --outfile=./dist/js/content.js",
+    "dev": "concurrently 'npm run dev:js' 'npm run dev:css' 'npm run dev:content'"
+  },
+  "author": "Özgür ÖZALP",
+  "license": "ISC",
+  "dependencies": {
+    "altogic": "^2.3.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.13",
+    "concurrently": "^7.6.0",
+    "esbuild": "^0.15.18",
+    "prettier": "^2.8.0",
+    "tailwindcss": "^3.2.4"
+  }
+}
