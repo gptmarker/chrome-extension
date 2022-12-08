@@ -1,3 +1,6 @@
 .idea
-/dist
 /node_modules
+/dist/js
+/dist/css
+.DS_Store
+.vscode
