@@ -1,6 +1,6 @@
 {
   "name": "chat-gpt-chrome-extension",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "GPTMarker - Share and save your ChatGPT conversations",
   "main": "index.js",
   "scripts": {

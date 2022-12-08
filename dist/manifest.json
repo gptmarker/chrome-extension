@@ -2,15 +2,15 @@
     "name": "GPTMarker",
     "author": "Altogic",
     "description": "GPTMarker - Share and save your ChatGPT conversations",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "manifest_version": 3,
     "content_scripts": [
         {
-            "matches": ["https://chat.openai.com/*"],
-            "js": ["js/content.js"]
+            "matches": ["https://chat.openai.com/chat"],
+            "js": ["js/content.js"],
+            "run_at": "document_end"
         }
     ],
-    "permissions": ["activeTab", "tabs", "storage", "scripting"],
     "icons": {
         "16": "images/16.png",
         "32": "images/32.png",
