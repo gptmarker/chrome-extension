@@ -1,15 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer base {
-	body,
-	#root {
-		min-height: 200px;
-		display: grid;
-	}
-	body {
-		background: #fff;
-		width: 400px;
-	}
-}
