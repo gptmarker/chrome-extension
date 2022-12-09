@@ -28,27 +28,72 @@ if (!document.querySelector('#saveBtnFromExtension')) {
 document.querySelector('#saveBtnFromExtension')?.addEventListener('click', saveThread);
 
 async function saveThread() {
-	const html = document.querySelector('main > :first-child').cloneNode(true);
+	try {
+		let html = document.querySelector('main > :first-child').cloneNode(true);
 
-	const cssLink = document.querySelector("link[rel='stylesheet']").href;
-	html.querySelectorAll('img').forEach(img => {
+		const cssLink = document.querySelector("link[rel='stylesheet']").href;
+		html = fixImageSrc(html);
+		const { question, answer } = getFirstQuestionAndAnswer();
+
+		this.disabled = true;
+		const { data, errors } = await altogic.db.model('gpt').create({
+			html: html.outerHTML,
+			cssLink,
+			question,
+			answer,
+		});
+
+		if (!errors) return open(`https://www.gptmarker.com/${data.shareId}`, '_blank');
+		if (hasMaxLengthThresholdExceeded(errors)) alert('The thread is too long, please shorten it and try again');
+		else alert("Couldn't save thread, please try again.");
+	} catch (error) {
+		alert(error.message);
+	} finally {
+		this.disabled = false;
+	}
+}
+
+function getFirstQuestionAndAnswer() {
+	const STRING_LENGTH = 140;
+	// This selector may change in the future
+	const selector =
+		'[class*="react-scroll-to-bottom"] > [class*="react-scroll-to-bottom"] > :first-child > *:not(:last-child)';
+	const thread = document.querySelectorAll(selector);
+
+	if (thread.length < 2) {
+		throw new Error('Please ask a question and wait for an answer before saving the thread');
+	}
+
+	const answer = thread[1].cloneNode(true);
+	answer.querySelector('pre')?.remove();
+
+	let answerText = answer.textContent.trim();
+	let questionText = thread[0].textContent.trim();
+
+	if (answerText.length > STRING_LENGTH) {
+		answerText = answerText.slice(0, STRING_LENGTH) + '...';
+	}
+
+	if (questionText.length > STRING_LENGTH) {
+		questionText = questionText.slice(0, STRING_LENGTH) + '...';
+	}
+
+	return {
+		question: questionText,
+		answer: answerText,
+	};
+}
+
+function fixImageSrc(parent) {
+	const DOMAIN = 'https://chat.openai.com';
+	parent.querySelectorAll('img').forEach(img => {
 		if (img.getAttribute('src').startsWith('/_next')) {
 			img.removeAttribute('srcset');
-			img.setAttribute('src', `https://chat.openai.com${img.getAttribute('src')}`);
+			img.setAttribute('src', `${DOMAIN}${img.getAttribute('src')}`);
 		}
 	});
 
-	this.disabled = true;
-	const { data, errors } = await altogic.db.model('gpt').create({
-		html: html.outerHTML,
-		cssLink,
-	});
-
-	this.disabled = false;
-
-	if (!errors) return open(`https://www.gptmarker.com/${data.shareId}`, '_blank');
-	if (hasMaxLengthThresholdExceeded(errors)) alert('The thread is too long, please shorten it and try again');
-	else alert("Couldn't save thread, please try again.");
+	return parent;
 }
 
 function hasMaxLengthThresholdExceeded(errors) {
