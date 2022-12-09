@@ -54,7 +54,7 @@ async function saveThread() {
 }
 
 function getFirstQuestionAndAnswer() {
-	const STRING_LENGTH = 140;
+	const STRING_LENGTH = 160;
 	// This selector may change in the future
 	const selector =
 		'[class*="react-scroll-to-bottom"] > [class*="react-scroll-to-bottom"] > :first-child > *:not(:last-child)';
