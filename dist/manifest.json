@@ -2,7 +2,7 @@
     "name": "GPTMarker",
     "author": "Altogic",
     "description": "GPTMarker - Share and save your ChatGPT conversations",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "manifest_version": 3,
     "content_scripts": [
         {
