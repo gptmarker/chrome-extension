@@ -28,17 +28,26 @@ if (!document.querySelector('#saveBtnFromExtension')) {
 document.querySelector('#saveBtnFromExtension')?.addEventListener('click', saveThread);
 
 async function saveThread() {
-	try {
-		let html = document.querySelector('main > :first-child').cloneNode(true);
+	const CONTAINER_SELECTOR = '[class*="react-scroll-to-bottom"] > [class*="react-scroll-to-bottom"] > :first-child';
+	const conversationThread = document.querySelector(CONTAINER_SELECTOR);
+	const threads = [];
 
-		const cssLink = document.querySelector("link[rel='stylesheet']").href;
-		html = fixImageSrc(html);
+	try {
+		this.disabled = true;
 		const { question, answer } = getFirstQuestionAndAnswer();
 
-		this.disabled = true;
+		for (const child of conversationThread.children) {
+			const markdownContainer = child.querySelector('.markdown');
+			if (child.classList.contains('dark:bg-gray-800')) {
+				threads.push({ from: 'human', content: child.textContent });
+			} else if (child.classList.contains('bg-gray-50')) {
+				threads.push({ from: 'gpt', content: markdownContainer.outerHTML });
+			}
+		}
+
 		const { data, errors } = await altogic.db.model('gpt').create({
-			html: html.outerHTML,
-			cssLink,
+			threads,
+			userImage: getUserImage(),
 			question,
 			answer,
 		});
@@ -51,6 +60,22 @@ async function saveThread() {
 	} finally {
 		this.disabled = false;
 	}
+}
+
+function hasMaxLengthThresholdExceeded(errors) {
+	return errors.items.some(error => error.code === 'max_length_threshold_exceeded');
+}
+
+function getUserImage() {
+	const canvas = document.createElement('canvas');
+	const image = document.querySelectorAll('img')[1];
+
+	canvas.width = 30;
+	canvas.height = 30;
+
+	canvas.getContext('2d').drawImage(image, 0, 0);
+
+	return canvas.toDataURL('image/jpeg');
 }
 
 function getFirstQuestionAndAnswer() {
@@ -82,20 +107,4 @@ function getFirstQuestionAndAnswer() {
 		question: questionText,
 		answer: answerText,
 	};
-}
-
-function fixImageSrc(parent) {
-	const DOMAIN = 'https://chat.openai.com';
-	parent.querySelectorAll('img').forEach(img => {
-		if (img.getAttribute('src').startsWith('/_next')) {
-			img.removeAttribute('srcset');
-			img.setAttribute('src', `${DOMAIN}${img.getAttribute('src')}`);
-		}
-	});
-
-	return parent;
-}
-
-function hasMaxLengthThresholdExceeded(errors) {
-	return errors.items.some(error => error.code === 'max_length_threshold_exceeded');
 }
